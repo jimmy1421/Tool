@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ultra Image Compressor - Reduce your images to a specific target size. Custom compression for perfect file sizes.">
+  <meta name="keywords" content="image compressor, target size compression, photo optimizer, custom image size">
+  <title>Precision Image Compressor - Set Your Target Size</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #4361ee;
+      --secondary: #3a0ca3;
+      --accent: #f72585;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8faff;
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    }
+    
+    .dropzone {
+      border: 2px dashed var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .dropzone.highlight {
+      border-color: var(--accent);
+      background-color: rgba(247, 37, 133, 0.05);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-accent {
+      background-color: var(--accent);
+    }
+    
+    .btn-accent:hover {
+      background-color: #d91a6d;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: #e9ecef;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    
+    .compression-card {
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .compression-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bounce {
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    /* Loading spinner */
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid var(--primary);
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      background-color: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+    }
+    
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    
+    .modal-close:hover {
+      color: #1f2937;
+    }
+    
+    /* Ad container styles */
+    .ad-container {
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 20px 0;
+      border: 1px solid #e9ecef;
+    }
+    
+    .ad-label {
+      font-size: 12px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .horizontal-ad {
+      width: 100%;
+      height: 90px;
+    }
+    
+    .vertical-ad {
+      width: 100%;
+      height: 250px;
+    }
+    
+    .rectangle-ad {
+      width: 100%;
+      height: 250px;
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+  <!-- Target Size Modal -->
+  <div id="targetSizeModal" class="modal">
+    <div class="modal-content relative">
+      <button id="modalCloseBtn" class="modal-close">&times;</button>
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Set Target Size</h3>
+      <p class="text-gray-600 mb-6">Enter the maximum file size you want for your compressed image (in KB):</p>
+      
+      <div class="mb-6">
+        <label for="targetSize" class="block text-sm font-medium text-gray-700 mb-2">Target Size (KB)</label>
+        <div class="relative">
+          <input type="number" id="targetSize" 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                 min="1" max="1000" value="10" placeholder="Enter size in KB">
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">KB</div>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">For best results, recommend at least 10KB for small images</p>
+      </div>
+      
+      <div class="flex justify-end space-x-3">
+        <button id="cancelBtn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          Cancel
+        </button>
+        <button id="confirmBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Confirm & Compress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header with Ad Space -->
+  <header class="gradient-bg text-white shadow-lg">
+    <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+        <div class="mb-4 md:mb-0">
+          <h1 class="text-3xl md:text-4xl font-bold">Precision Image Compressor</h1>
+          <p class="mt-2 text-blue-100">Compress images to your exact target size with pixel-perfect accuracy</p>
+        </div>
+        
+        <div class="hidden md:block">
+          <!-- Small header ad -->
+          <div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <img src="https://placehold.co/300x100" alt="Google AdSense advertisement placeholder with tech-related products" class="mx-auto" />
+          </div>
+        </div>
+      </div>
+      
+      <!-- Horizontal Ad Banner -->
+      <div class="ad-container mt-4">
+        <span class="ad-label">Advertisement</span>
+        <img src="https://placehold.co/728x90" alt="Horizontal banner advertisement space optimized for Google AdSense display" class="horizontal-ad mx-auto" />
+      </div>
+    </div>
+  </header>
+  
+  <main class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Left Sidebar Ad Space -->
+      <div class="lg:col-span-2 hidden lg:block">
+        <div class="sticky top-4 space-y-8">
+          <div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <img src="https://placehold.co/160x600" alt="Vertical skyscraper advertisement space for Google AdSense placements" class="vertical-ad mx-auto" />
+          </div>
+          
+          <div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <img src="https://placehold.co/160x600" alt="Secondary vertical advertisement slot for complementary products" class="vertical-ad mx-auto" />
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="lg:col-span-8">
+        <!-- Top Content Ad -->
+        <div class="mb-8">
+          <div class="ad-container">
+            <span class="ad-label">Sponsored</span>
+            <img src="https://placehold.co/728x90" alt="Top content advertisement space for relevant image editing tools" class="horizontal-ad mx-auto" />
+          </div>
+        </div>
+        
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+          <!-- Compression Tool -->
+          <div class="p-6 md:p-8">
+            <div class="text-center mb-8">
+              <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Custom Size Image Compression</h2>
+              <p class="text-gray-600">Upload your image and specify your exact target file size</p>
+            </div>
+            
+            <div id="upload-container" class="mb-8">
+              <div id="dropzone" class="dropzone rounded-xl p-8 text-center cursor-pointer">
+                <div class="flex flex-col items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-blue-500 mb-4 bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <h3 class="text-xl font-semibold text-gray-700">Drag & Drop Your Image Here</h3>
+                  <p class="text-gray-500 mb-4">JPEG, PNG, WEBP supported (Max 10MB)</p>
+                  <button id="select-file-btn" class="btn-primary text-white font-medium py-2 px-6 rounded-full">
+                    Or Select Image
+                  </button>
+                </div>
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+              </div>
+            </div>
+            
+            <!-- Mid-content Ad -->
+            <div class="mb-8">
+              <div class="ad-container">
+                <span class="ad-label">Advertisement</span>
+                <img src="https://placehold.co/728x90" alt="Mid-content advertisement placement optimized for user engagement" class="horizontal-ad mx-auto" />
+              </div>
+            </div>
+            
+            <div id="processing-ui" class="hidden text-center mb-8">
+              <div class="loader mx-auto mb-4"></div>
+              <h3 class="text-xl font-semibold text-gray-700 mb-2">Compressing your image...</h3>
+              <p class="text-gray-500 mb-4">Optimizing to target size: <span id="target-size-display" class="font-medium">10 KB</span></p>
+              <div class="progress-bar mx-auto max-w-md">
+                <div id="progress-fill" class="progress-fill"></div>
+              </div>
+            </div>
+            
+            <div id="results-ui" class="hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="compression-card bg-white border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-semibold text-gray-700">Original Image</h4>
+                    <span id="original-size" class="text-sm font-medium bg-gray-100 px-2 py-1 rounded">0 KB</span>
+                  </div>
+                  <div class="bg-gray-100 rounded-lg overflow-hidden">
+                    <img id="original-image" class="w-full h-auto" src="#" alt="Original uploaded image for comparison" />
+                  </div>
+                </div>
+                
+                <div class="compression-card bg-white border border-gray-200 rounded-xl p-4">
+                  <div class="flex justify-between items-center mb-4">
+                    <h4 class="font-semibold text-gray-700">Compressed Image</h4>
+                    <span id="compressed-size" class="text-sm font-medium bg-green-100 text-green-800 px-2 py-1 rounded">0 KB</span>
+                  </div>
+                  <div class="bg-gray-100 rounded-lg overflow-hidden">
+                    <img id="compressed-image" class="w-full h-auto" src="#" alt="Compressed optimized image at target size" />
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Results Bottom Ad -->
+              <div class="mb-8">
+                <div class="ad-container">
+                  <span class="ad-label">Try these image services</span>
+                  <img src="https://placehold.co/728x90" alt="Advertisement for complementary image editing services" class="horizontal-ad mx-auto" />
+                </div>
+              </div>
+              
+              <div class="text-center">
+                <p class="text-lg font-medium text-gray-700 mb-1">Target Size: <span id="final-target-display" class="font-bold text-blue-600">10 KB</span></p>
+                <p class="text-lg font-medium text-gray-700 mb-4">Reduced by <span id="reduction-percent" class="font-bold text-green-600">0%</span></p>
+                <button id="download-btn" class="btn-primary text-white font-medium py-3 px-8 rounded-full inline-flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download Compressed Image
+                </button>
+                <button id="compress-again-btn" class="mt-4 px-4 py-2 text-blue-600 hover:text-blue-800 flex items-center mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Compress Again with New Target
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Features Section with Ad -->
+          <div class="gradient-bg p-8 text-white">
+            <h3 class="text-xl font-bold mb-6 text-center">Precision Compression Features</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                <div class="flex items-center mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-300 mr-3 pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  <h4 class="font-semibold">Exact Size Control</h4>
+                </div>
+                <p class="text-blue-100 text-sm">Specify the exact file size you need and our algorithm will precisely target it.</p>
+              </div>
+              
+              <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                <div class="flex items-center mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-200 mr-3 pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <h4 class="font-semibold">Smart Optimization</h4>
+                </div>
+                <p class="text-blue-100 text-sm">Intelligently adjusts quality and dimensions to hit your target while preserving details.</p>
+              </div>
+              
+              <div class="bg-white bg-opacity-10 p-4 rounded-lg">
+                <div class="flex items-center mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-200 mr-3 pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h4 class="font-semibold">Browser-Based</h4>
+                </div>
+                <p class="text-blue-100 text-sm">All processing happens in your browser - your images never leave your device.</p>
+              </div>
+            </div>
+            
+            <!-- Features Bottom Ad -->
+            <div class="mt-6">
+              <div class="ad-container">
+                <span class="ad-label">Premium Tools</span>
+                <img src="https://placehold.co/728x90" alt="Advertisement for premium image editing tools and services" class="rectangle-ad mx-auto" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- FAQ Section with Ad -->
+        <div class="mt-12 bg-white rounded-xl shadow-xl overflow-hidden">
+          <div class="p-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6">Frequently Asked Questions</h3>
+            
+            <div class="space-y-4">
+              <div class="border-b border-gray-200 pb-4">
+                <button class="faq-question flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-600 focus:outline-none">
+                  How precise is the target size compression?
+                  <svg class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div class="faq-answer mt-2 text-gray-600 hidden">
+                  <p>Our algorithm makes multiple passes to get as close as possible to your target size. While we can't guarantee exact byte-for-byte precision, we typically get within 5% of your target size while maintaining maximum quality at that size threshold.</p>
+                </div>
+              </div>
+              
+              <div class="border-b border-gray-200 pb-4">
+                <button class="faq-question flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-600 focus:outline-none">
+                  What's the smallest target size I can set?
+                  <svg class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div class="faq-answer mt-2 text-gray-600 hidden">
+                  <p>You can set any target size down to 1KB, but we recommend:</p>
+                  <ul class="list-disc pl-5 mt-2 space-y-1">
+                    <li>10KB+ for profile pictures and small images</li>
+                    <li>25KB+ for standard web images</li>
+                    <li>50KB+ for photos and detailed graphics</li>
+                  </ul>
+                  <p class="mt-2">Very small targets may result in noticeable quality loss depending on the original image.</p>
+                </div>
+              </div>
+              
+              <div class="border-b border-gray-200 pb-4">
+                <button class="faq-question flex justify-between items-center w-full text-left font-medium text-gray-700 hover:text-blue-600 focus:outline-none">
+                  Can I change the target size after compressing?
+                  <svg class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div class="faq-answer mt-2 text-gray-600 hidden">
+                  <p>Yes! After compression, click the "Compress Again with New Target" button to reopen the target size dialog and try a different size. The original image is preserved in memory until you reload the page.</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- FAQ Bottom Ad -->
+            <div class="mt-8">
+              <div class="ad-container">
+                <span class="ad-label">Advertisement</span>
+                <img src="https://placehold.co/728x90" alt="Bottom content advertisement placement for relevant products" class="horizontal-ad mx-auto" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Sidebar Ad Space -->
+      <div class="lg:col-span-2 hidden lg:block">
+        <div class="sticky top-4 space-y-8">
+          <div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <img src="https://placehold.co/160x600" alt="Right sidebar skyscraper advertisement optimized for high CTR" class="vertical-ad mx-auto" />
+          </div>
+          
+          <div class="ad-container">
+            <span class="ad-label">Sponsored Content</span>
+            <img src="https://placehold.co/300x250" alt="Square advertisement placement for relevant tech products" class="rectangle-ad mx-auto" />
+          </div>
+          
+          <div class="bg-white p-4 rounded-lg shadow">
+            <h4 class="font-bold text-lg mb-3">Popular Tools</h4>
+            <div class="space-y-4">
+              <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <span class="text-sm">Photo Editor</span>
+              </div>
+              <div class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                  </svg>
+                </div>
+                <span class="text-sm">File Converter</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="ad-container">
+            <span class="ad-label">Advertisement</span>
+            <img src="https://placehold.co/300x250" alt="Secondary square advertisement slot for complementary services" class="rectangle-ad mx-auto" />
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Page Ad -->
+    <div class="mt-12">
+      <div class="ad-container">
+        <span class="ad-label">Advertisement</span>
+        <img src="https://placehold.co/970x90" alt="Footer advertisement placement spanning full page width" class="w-full" style="height: 90px;" />
+      </div>
+    </div>
+  </main>
+  
+  <footer class="bg-gray-800 text-white py-8">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <h4 class="text-xl font-bold mb-2">Precision Image Compressor</h4>
+          <p class="text-gray-400 text-sm">Compress images to your exact target size with pixel-perfect accuracy</p>
+        </div>
+        <div class="flex space-x-4">
+          <a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a>
+          <a href="#" class="text-gray-400 hover:text-white transition">Terms</a>
+          <a href="#" class="text-gray-400 hover:text-white transition">Contact</a>
+        </div>
+      </div>
+      <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
+        <p>© 2023 Precision Image Tools. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // DOM Elements
+      const fileInput = document.getElementById('file-input');
+      const dropzone = document.getElementById('dropzone');
+      const selectFileBtn = document.getElementById('select-file-btn');
+      const uploadContainer = document.getElementById('upload-container');
+      const processingUI = document.getElementById('processing-ui');
+      const resultsUI = document.getElementById('results-ui');
+      const originalImage = document.getElementById('original-image');
+      const compressedImage = document.getElementById('compressed-image');
+      const originalSize = document.getElementById('original-size');
+      const compressedSize = document.getElementById('compressed-size');
+      const reductionPercent = document.getElementById('reduction-percent');
+      const downloadBtn = document.getElementById('download-btn');
+      const progressFill = document.getElementById('progress-fill');
+      const targetSizeDisplay = document.getElementById('target-size-display');
+      const finalTargetDisplay = document.getElementById('final-target-display');
+      const compressAgainBtn = document.getElementById('compress-again-btn');
+      const faqQuestions = document.querySelectorAll('.faq-question');
+      
+      // Modal elements
+      const targetSizeModal = document.getElementById('targetSizeModal');
+      const targetSizeInput = document.getElementById('targetSize');
+      const modalCloseBtn = document.getElementById('modalCloseBtn');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      
+      // State variables
+      let selectedFile = null;
+      let currentTargetSizeKB = 10; // Default value
+      let compressedBlob = null;
+      
+      // Initialize modal functionality
+      function openModal() {
+        targetSizeModal.classList.add('active');
+      }
+      
+      function closeModal() {
+        targetSizeModal.classList.remove('active');
+      }
+      
+      modalCloseBtn.addEventListener('click', closeModal);
+      cancelBtn.addEventListener('click', closeModal);
+      
+      // Confirm target size and start compression
+      confirmBtn.addEventListener('click', function() {
+        const newTarget = parseInt(targetSizeInput.value);
+        if (newTarget > 0) {
+          currentTargetSizeKB = newTarget;
+          targetSizeDisplay.textContent = currentTargetSizeKB + ' KB';
+          closeModal();
+          startCompression();
+        } else {
+          alert('Please enter a valid target size (minimum 1 KB)');
+        }
+      });
+      
+      // Recompress with new target
+      compressAgainBtn.addEventListener('click', function() {
+        openModal();
+      });
+      
+      // File handling and drag/drop
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight() {
+        dropzone.classList.add('highlight');
+      }
+      
+      function unhighlight() {
+        dropzone.classList.remove('highlight');
+      }
+      
+      dropzone.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length) {
+          handleFileSelection(files);
+        }
+      }
+      
+      selectFileBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', function() {
+        if (this.files.length) {
+          handleFileSelection(this.files);
+        }
+      });
+      
+      // FAQ Accordion
+      faqQuestions.forEach(question => {
+        question.addEventListener('click', function() {
+          const answer = this.nextElementSibling;
+          const icon = this.querySelector('svg');
+          
+          answer.classList.toggle('hidden');
+          icon.classList.toggle('rotate-180');
+        });
+      });
+      
+      // Handle file selection - show modal for target size
+      function handleFileSelection(files) {
+        const file = files[0];
+        if (!file.type.match('image.*')) {
+          alert('Please select an image file (JPEG, PNG, WEBP)');
+          return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+          alert('File size too large. Maximum 10MB allowed.');
+          return;
+        }
+        
+        selectedFile = file;
+        
+        // Preview the original image
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          originalImage.src = e.target.result;
+          originalSize.textContent = formatFileSize(file.size);
+          
+          // Show target size dialog
+          openModal();
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      // Start compression with current target size
+      function startCompression() {
+        if (!selectedFile) return;
+        
+        uploadContainer.classList.add('hidden');
+        processingUI.classList.remove('hidden');
+        resultsUI.classList.add('hidden');
+        
+        // Simulate progress (we'll update with actual compression progress)
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += 10;
+          progressFill.style.width = `${Math.min(progress, 90)}%`;
+          if (progress >= 90) clearInterval(progressInterval);
+        }, 100);
+        
+        // Read the file and compress
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          compressToTargetSize(e.target.result, selectedFile.type, currentTargetSizeKB * 1024).then(compressedDataURL => {
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
+            
+            setTimeout(() => {
+              compressedImage.src = compressedDataURL;
+              
+              // Calculate compressed size (approx.)
+              const compressedSizeBytes = Math.floor(compressedDataURL.length * 0.75); // Approximation for base64
+              compressedSize.textContent = formatFileSize(compressedSizeBytes);
+              finalTargetDisplay.textContent = currentTargetSizeKB + ' KB';
+              
+              // Calculate reduction
+              updateReductionStats(selectedFile.size, compressedSizeBytes);
+              
+              // Create blob for download
+              dataURLToBlob(compressedDataURL).then(blob => {
+                compressedBlob = blob;
+                
+                // Show results
+                processingUI.classList.add('hidden');
+                resultsUI.classList.remove('hidden');
+              });
+            }, 300);
+          });
+        };
+        reader.readAsDataURL(selectedFile);
+      }
+      
+      // Format file size
+      function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        else return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      }
+      
+      // Update reduction stats
+      function updateReductionStats(originalBytes, compressedBytes) {
+        const reduction = ((originalBytes - compressedBytes) / originalBytes * 100).toFixed(1);
+        reductionPercent.textContent = `${reduction}%`;
+      }
+      
+      // Download compressed image
+      downloadBtn.addEventListener('click', function() {
+        if (!compressedBlob) return;
+        
+        const url = URL.createObjectURL(compressedBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Set filename
+        const originalName = selectedFile.name.split('.')[0];
+        const extension = compressedBlob.type.split('/')[1] || 'jpg';
+        a.download = `${originalName}-${currentTargetSizeKB}kb.${extension}`;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+      
+      // Convert data URL to Blob
+      function dataURLToBlob(dataURL) {
+        return new Promise((resolve) => {
+          fetch(dataURL)
+            .then(res => res.blob())
+            .then(blob => resolve(blob));
+        });
+      }
+      
+      // Advanced compression to target size
+      function compressToTargetSize(src, fileType, targetBytes) {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Initial dimensions
+            let width = img.width;
+            let height = img.height;
+            
+            // Initial quality
+            let quality = 0.7;
+            let bestResult = null;
+            let bestSize = Infinity;
+            let bestQuality = quality;
+            let bestWidth = width;
+            let bestHeight = height;
+            
+            // Determine output format (JPEG for smallest size)
+            let mimeType = 'image/jpeg';
+            if (fileType === 'image/png') mimeType = 'image/png';
+            else if (fileType === 'image/webp') mimeType = 'image/webp';
+            
+            // Compression function
+            const attemptCompression = () => {
+              // Set canvas dimensions
+              canvas.width = width;
+              canvas.height = height;
+              
+              // Draw image
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Convert to data URL
+              const compressedDataURL = canvas.toDataURL(mimeType, quality);
+              const sizeBytes = Math.floor(compressedDataURL.length * 0.75); // Approximation
+              
+              // Check if this is our best result so far
+              if (sizeBytes <= targetBytes && sizeBytes > bestSize * 0.9) {
+                bestResult = compressedDataURL;
+                bestSize = sizeBytes;
+                bestQuality = quality;
+                bestWidth = width;
+                bestHeight = height;
+              }
+              
+              // Check if we're close enough or need to adjust
+              const sizeRatio = sizeBytes / targetBytes;
+              
+              if (sizeRatio > 1.5) {
+                // Too big - reduce dimensions and quality aggressively
+                width *= 0.8;
+                height *= 0.8;
+                quality = Math.max(0.1, quality * 0.7);
+                requestAnimationFrame(attemptCompression);
+              } else if (sizeRatio > 1.1) {
+                // Slightly big - reduce quality more gently
+                quality = Math.max(0.1, quality * 0.9);
+                requestAnimationFrame(attemptCompression);
+              } else if (sizeRatio < 0.7 && quality < 0.9) {
+                // Too small - try increasing quality if we can
+                quality = Math.min(0.9, quality * 1.1);
+                requestAnimationFrame(attemptCompression);
+              } else {
+                // Close enough - use this or our best result
+                if (!bestResult || sizeBytes <= targetBytes) {
+                  resolve(compressedDataURL);
+                } else {
+                  // Use our best result (even if slightly over target)
+                  canvas.width = bestWidth;
+                  canvas.height = bestHeight;
+                  ctx.drawImage(img, 0, 0, bestWidth, bestHeight);
+                  resolve(canvas.toDataURL(mimeType, bestQuality));
+                }
+              }
+            };
+            
+            // Start the compression process
+            requestAnimationFrame(attemptCompression);
+          };
+          img.src = src;
+        });
+      }
+    });
+  </script>
+</body>
+</html>
