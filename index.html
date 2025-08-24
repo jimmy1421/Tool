@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolbox - Online File Utilities & Converters</title>
+    <meta name="description" content="Free online tools for image editing, PDF conversion, file compression and more. No registration required.">
+    <meta name="keywords" content="image compressor, PDF converter, online tools, file converter, image resizer">
+    <meta name="author" content="ToolHub">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #564fd1;
+            --dark: #1e1e2c;
+            --darker: #161622;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --border-radius: 8px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--darker);
+            color: var(--light);
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--dark);
+            box-shadow: var(--shadow);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--light);
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 1rem;
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            box-shadow: var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 0 auto 1.5rem;
+            color: var(--gray);
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .tools-section {
+            background-color: var(--dark);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .tool-categories {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        .tool-category {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tool-category.active {
+            color: var(--light);
+        }
+
+        .tool-category.active:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+        }
+
+        .tool-category:hover:not(.active) {
+            color: var(--light);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tool-content {
+            padding: 2rem;
+        }
+
+        .tool-pane {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tool-pane.active {
+            display: block;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-card-image {
+            height: 150px;
+            width: 100%;
+            object-fit: cover;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tool-card-body {
+            padding: 1.25rem;
+        }
+
+        .tool-card-title {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+
+        .tool-card-desc {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-bottom: 1rem;
+        }
+
+        .tool-card-button {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .tool-card-button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .footer {
+            background-color: var(--dark);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--gray);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--light);
+        }
+
+        .copyright {
+            font-size: 0.875rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .tool-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .tool-categories {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Tool specific styles */
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .tool-options {
+            margin-top: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--light);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            color: var(--light);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tool-results {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .result-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .result-name {
+            flex: 1;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .result-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .result-btn.download {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .result-btn.delete {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: var(--border-radius);
+            background-color: var(--primary);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/34e608e3-3469-4427-9daa-0a05c0674a3b.png" alt="ToolHub logo - a blue and purple abstract geometric shape representing tools and technology" class="logo-img">
+                    ToolHub
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <section class="hero">
+                <h1>Your All-in-One Online Toolbox</h1>
+                <p>Free, fast and secure online tools for all your file conversion and editing needs. No registration required, no watermarks, just powerful tools at your fingertips.</p>
+                <button class="cta-button">Get Started</button>
+            </section>
+
+            <section class="tools-section">
+                <div class="tool-categories">
+                    <button class="tool-category active" data-tab="images">Image Tools</button>
+                    <button class="tool-category" data-tab="pdf">PDF Tools</button>
+                    <button class="tool-category" data-tab="video">Video Tools</button>
+                    <button class="tool-category" data-tab="audio">Audio Tools</button>
+                    <button class="tool-category" data-tab="documents">Document Tools</button>
+                    <button class="tool-category" data-tab="other">Other Tools</button>
+                </div>
+
+                <div class="tool-content">
+                    <!-- Image Tools -->
+                    <div class="tool-pane active" id="images">
+                        <div class="tool-grid">
+                            <div class="tool-card">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d2a54970-c49c-4599-83b2-22d0e1e09dd5.png" alt="An image being compressed with quality slider showing before and after comparison" class="tool-card-image">
+                                <div class="tool-card-body">
+                                    <h3 class="tool-card-title">Image Compressor</h3>
+                                    <p class="tool-card-desc">Reduce image file size without losing quality. Supports JPG, PNG, WEBP.</p>
+                                    <a href="#" class="tool-card-button" data-tool="image-compressor">Open Tool</a>
+                                </div>
+                            </div>
+
+                            <div class="tool-card">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/243bf046-7e70-486f-8cb3-acef04b128a1.png" alt="Low resolution image transforming into high resolution with sharp details" class="tool-card-image">
+                                <div class="tool-card-body">
+                                    <h3 class="tool-card-title">Image Upscaler</h3>
+                                    <p class="tool-card-desc">Enhance image resolution using AI upscaling technology.</p>
+                                    <a href="#" class="tool-card-button" data-tool="image-upscaler">Open Tool</a>
+                                </div>
+                            </div>
+
+                            <div class="tool-card">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9f9f289e-d75b-43d1-95a1-aabd6d72078a.png" alt="Photo frame being adjusted with cropping handles on all sides" class="tool-card-image">
+                                <div class="tool-card-body">
+                                    <h3 class="tool-card-title">Image Cropper</h3>
+                                    <p class="tool-card-desc">Crop and resize images to exact dimensions. Supports aspect ratios.</p>
+                                    <a href="#" class="tool-card-button" data-tool="image-cropper">Open Tool</a>
+                                </div>
+                            </div>
+
+                            <div class="tool-card">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/aac089fc-3eeb-4345-96d6-2374332a8dca.png" alt="Conversion interface showing PNG, JPG, WEBP file format options" class="tool-card-image">
+                                <div class="tool-card-body">
+                                    <h3 class="tool-card-title">Image Converter</h3>
+                                    <p class="tool-card-desc">Convert between JPG, PNG, WEBP, GIF and more formats.</p>
+                                    <a href="#" class="tool-card-button" data-tool="image-converter">Open Tool</a>
+                                </div>
+                            </div>
+
+                            <div class="tool-card">
+                                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/80731f1b-e349-449a-9c66-3c1fd654b7d2.png" alt="Photo editor with adjustment sliders for brightness, contrast, saturation" class="tool-card-image">
+                                <div class="tool-card-body">
+                                    <h3 class="tool-card-title">Image Editor</h3>
+                                    <p class="tool-card-desc">Basic photo editing tools including filters and adjustments.</p>
+                                    <a href="#" class="tool-card-button" data-tool="image-editor">Open Tool</a>
+
